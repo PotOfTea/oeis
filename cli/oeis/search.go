@@ -25,8 +25,6 @@ func SearchAPI(queryData string) ([]string, int, error) {
 		return nil, 0, err
 	}
 
-	//results, count, error := displayResults(queryResponse)
-
 	return getData(queryResponse)
 }
 
@@ -36,34 +34,16 @@ func getData(query *OeisQuery) ([]string, int, error) {
 	var results []string
 
 	if resultCount > 0 && queryResults != nil {
-		for i := 0; i < 5; i++ {
+		for i := 0; i < consts.SearchResults; i++ {
 			results = append(results, queryResults[i].Name)
-			//fmt.Printf("%v) %v \n", i+1, queryResults[i].Name)
 		}
 	} else if resultCount > 0 && results == nil {
-		return nil, 0, fmt.Errorf("Found %v results, too many to show. Please refine your search.\n", resultCount)
+		return nil, 0, fmt.Errorf("found %v results, too many to show. Please refine your search", resultCount)
 	} else {
-		return nil, 0, fmt.Errorf("Sorry, but the terms do not match anything in the table.")
+		return nil, 0, fmt.Errorf("sorry, but the terms do not match anything in the table")
 	}
-	//fmt.Printf("%v %v \n", results, resultCount)
 	return results, resultCount, nil
 }
-
-// func displayResults(query *OeisQuery) {
-// 	resultCount := query.Count
-// 	results := query.Results
-
-// 	if resultCount > 0 && results != nil {
-// 		fmt.Printf("Found %v results. Showing first five:\n", resultCount)
-// 		for i := 0; i < 5; i++ {
-// 			fmt.Printf("%v) %v \n", i+1, results[i].Name)
-// 		}
-// 	} else if resultCount > 0 && results == nil {
-// 		fmt.Printf("Found %v results, too many to show. Please refine your search.\n", resultCount)
-// 	} else {
-// 		fmt.Println("Sorry, but the terms do not match anything in the table.")
-// 	}
-// }
 
 func validateJSON(body []byte) (*OeisQuery, error) {
 	var o = new(OeisQuery)
