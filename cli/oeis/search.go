@@ -2,7 +2,6 @@ package oeis
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,12 +19,12 @@ func SearchAPI(queryData string) error {
 		return err
 	}
 
-	objmap, err := validateJSON(body)
+	o, err := validateJSON(body)
 	if err != nil {
 		return err
 	}
 
-	displayResults(objmap)
+	displayResults(o)
 
 	return nil
 
@@ -33,21 +32,15 @@ func SearchAPI(queryData string) error {
 
 }
 
-func displayResults(data map[string]interface{}) {
-	resultCount := data["count"].(float64)
-	results := data["results"]
+func displayResults(query *OeisQuery) {
+	resultCount := query.Count
+	results := query.Results
 
 	if resultCount > 0 && results != nil {
 		fmt.Printf("Found %v results. Showing first five:\n", resultCount)
-		var filtredResults []string
-		for _, item := range results.([]interface{}) {
-			filtredResults = append(filtredResults, item.(map[string]interface{})["name"].(string))
-		}
-
 		for i := 0; i < 5; i++ {
-			fmt.Printf("%v) %v \n", i+1, filtredResults[i])
+			fmt.Printf("%v) %v \n", i+1, results[i].Name)
 		}
-
 	} else if resultCount > 0 && results == nil {
 		fmt.Printf("Found %v results, too many to show. Please refine your search.\n", resultCount)
 	} else {
@@ -55,25 +48,56 @@ func displayResults(data map[string]interface{}) {
 	}
 }
 
-func validateJSON(body []byte) (map[string]interface{}, error) {
+// func displayResults(data map[string]interface{}) {
+// 	resultCount := data["count"].(float64)
+// 	results := data["results"]
 
-	//fmt.Println(string(body))
-	var jsonKeys = []string{"greeting", "query", "count", "start", "results"}
+// 	if resultCount > 0 && results != nil {
+// 		fmt.Printf("Found %v results. Showing first five:\n", resultCount)
+// 		var filtredResults []string
+// 		for _, item := range results.([]interface{}) {
+// 			filtredResults = append(filtredResults, item.(map[string]interface{})["name"].(string))
+// 		}
 
-	var objmap map[string]interface{}
-	json.Unmarshal([]byte(body), &objmap)
+// 		for i := 0; i < 5; i++ {
+// 			fmt.Printf("%v) %v \n", i+1, filtredResults[i])
+// 		}
 
-	for _, jsonKey := range jsonKeys {
-		_, ok := objmap[jsonKey]
-		if !ok {
-			//errorMsg := "Invalid JSON response should contain keys: " + strings.Join(jsonKeys, ",") + ". Response didn't contain key - " + jsonKey
-			errorMsg := "Error: OEIS.org could not parse search query"
-			return nil, errors.New(errorMsg)
-		}
+// 	} else if resultCount > 0 && results == nil {
+// 		fmt.Printf("Found %v results, too many to show. Please refine your search.\n", resultCount)
+// 	} else {
+// 		fmt.Println("Sorry, but the terms do not match anything in the table.")
+// 	}
+// }
+
+func validateJSON(body []byte) (*OeisQuery, error) {
+	var o = new(OeisQuery)
+	err := json.Unmarshal(body, &o)
+	if err != nil {
+		return nil, err
 	}
-	return objmap, nil
-
+	return o, nil
 }
+
+// func validateJSON(body []byte) (map[string]inte()rface{}, error) {
+
+// 	//fmt.Println(string(body))
+// 	var jsonKeys = []string{"greeting", "query", "count", "start", "results"}
+
+// 	var objmap map[string]interface{}
+// 	json.Unmarshal([]byte(body), &objmap)
+
+// 	for _, jsonKey := range jsonKeys {
+// 		_, ok := objmap[jsonKey]
+// 		if !ok {
+// 			//errorMsg := "Invalid JSON response should contain keys: " + strings.Join(jsonKeys, ",") + ". Response didn't contain key - " + jsonKey
+// 			errorMsg := "Error: OEIS.org could not parse search query"
+// 			return nil, errors.New(errorMsg)
+// 		}
+// 	}
+// 	return objmap, nil
+
+// }
 
 func httpGet(baseURL *url.URL) ([]byte, error) {
 	resp, err := http.Get(baseURL.String())
@@ -103,6 +127,6 @@ func buildURL(inputURL string, queryData string) (*url.URL, error) {
 	params.Add("fmt", "json")
 	baseURL.RawQuery = params.Encode()
 
-	//fmt.Printf("Encoded URL is %q\n", baseURL.String())
+	fmt.Printf("Encoded URL is %q\n", baseURL.String())
 	return baseURL, err
 }
