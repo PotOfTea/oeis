@@ -18,11 +18,12 @@ var rootCmd = &cobra.Command{
 	Long:  "CLI built on golang to query The On-Line Encyclopedia of Integer Sequences",
 	Run: func(cmd *cobra.Command, args []string) {
 		inputData := input.Format(args)
-		err := oeis.SearchAPI(inputData)
+		results, count, err := oeis.SearchAPI(inputData)
 		if err != nil {
 			output.PrintError(err.Error())
 			os.Exit(1)
 		}
+		output.PrintResults(results, count)
 	},
 }
 
