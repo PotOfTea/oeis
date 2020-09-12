@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"oeis/pkg/consts"
+	"time"
 )
 
 func SearchAPI(queryData string) error {
@@ -27,9 +28,6 @@ func SearchAPI(queryData string) error {
 	displayResults(o)
 
 	return nil
-
-	//https://stackoverflow.com/questions/59759095/error-interface-conversion-interface-is-interface-not-mapstringinter
-
 }
 
 func displayResults(query *OeisQuery) {
@@ -48,28 +46,6 @@ func displayResults(query *OeisQuery) {
 	}
 }
 
-// func displayResults(data map[string]interface{}) {
-// 	resultCount := data["count"].(float64)
-// 	results := data["results"]
-
-// 	if resultCount > 0 && results != nil {
-// 		fmt.Printf("Found %v results. Showing first five:\n", resultCount)
-// 		var filtredResults []string
-// 		for _, item := range results.([]interface{}) {
-// 			filtredResults = append(filtredResults, item.(map[string]interface{})["name"].(string))
-// 		}
-
-// 		for i := 0; i < 5; i++ {
-// 			fmt.Printf("%v) %v \n", i+1, filtredResults[i])
-// 		}
-
-// 	} else if resultCount > 0 && results == nil {
-// 		fmt.Printf("Found %v results, too many to show. Please refine your search.\n", resultCount)
-// 	} else {
-// 		fmt.Println("Sorry, but the terms do not match anything in the table.")
-// 	}
-// }
-
 func validateJSON(body []byte) (*OeisQuery, error) {
 	var o = new(OeisQuery)
 	err := json.Unmarshal(body, &o)
@@ -79,28 +55,11 @@ func validateJSON(body []byte) (*OeisQuery, error) {
 	return o, nil
 }
 
-// func validateJSON(body []byte) (map[string]inte()rface{}, error) {
-
-// 	//fmt.Println(string(body))
-// 	var jsonKeys = []string{"greeting", "query", "count", "start", "results"}
-
-// 	var objmap map[string]interface{}
-// 	json.Unmarshal([]byte(body), &objmap)
-
-// 	for _, jsonKey := range jsonKeys {
-// 		_, ok := objmap[jsonKey]
-// 		if !ok {
-// 			//errorMsg := "Invalid JSON response should contain keys: " + strings.Join(jsonKeys, ",") + ". Response didn't contain key - " + jsonKey
-// 			errorMsg := "Error: OEIS.org could not parse search query"
-// 			return nil, errors.New(errorMsg)
-// 		}
-// 	}
-// 	return objmap, nil
-
-// }
-
-func httpGet(baseURL *url.URL) ([]byte, error) {
-	resp, err := http.Get(baseURL.String())
+func httpGet(baseURL string) ([]byte, error) {
+	var netClient = &http.Client{
+		Timeout: time.Second * 10,
+	}
+	resp, err := netClient.Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -115,11 +74,11 @@ func httpGet(baseURL *url.URL) ([]byte, error) {
 	return body, nil
 }
 
-func buildURL(inputURL string, queryData string) (*url.URL, error) {
+func buildURL(inputURL string, queryData string) (string, error) {
 	baseURL, err := url.Parse(inputURL)
 	if err != nil {
 		fmt.Println("Malformed URL: ", err.Error())
-		return nil, err
+		return "", err
 	}
 	baseURL.Path += "search"
 	params := url.Values{}
@@ -127,6 +86,6 @@ func buildURL(inputURL string, queryData string) (*url.URL, error) {
 	params.Add("fmt", "json")
 	baseURL.RawQuery = params.Encode()
 
-	fmt.Printf("Encoded URL is %q\n", baseURL.String())
-	return baseURL, err
+	//fmt.Printf("Encoded URL is %q\n", baseURL.String())
+	return baseURL.String(), nil
 }
