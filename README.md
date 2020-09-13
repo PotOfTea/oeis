@@ -1,7 +1,7 @@
 # Simple cli tool to query oeis.org
 
 oeis let's query [oeis](http://oeis.org/) database from terminal.
-
+Tool can be downloaded from [releases](https://github.com/PotOfTea/oeis/releases)
 ```sh
 oeis 1 1 3 5 7
 ```
