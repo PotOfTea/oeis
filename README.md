@@ -1,7 +1,7 @@
 # Simple cli tool to query oeis.org
 
-oeis let's query [oeis](http://oeis.org/) database from terminal.
-Tool can be downloaded from [releases](https://github.com/PotOfTea/oeis/releases) after download don't forget to `chmod +x`
+`oeis` let's query [oeis.org](http://oeis.org/) database from terminal.
+Tool can be downloaded from [releases](https://github.com/PotOfTea/oeis/releases). After download don't forget to set executable permision.
 
 ```sh
 chmod +x oeis
