@@ -7,14 +7,13 @@ Tool can be downloaded from [releases](https://github.com/PotOfTea/oeis/releases
 chmod +x oeis
 ```
 
+![terminal output example](/oeis_terminal_output.png)
+
 Example:
 
 ```sh
 oeis 1 1 3 5 7
 ```
-
-![terminal output example](/oeis_terminal_output.png)
-
 
 
 To build from source-code run
