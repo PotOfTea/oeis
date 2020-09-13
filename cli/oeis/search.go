@@ -14,6 +14,7 @@ import (
 
 func SearchAPI(queryData string) ([]string, int, error) {
 	baseURL, err := buildURL(consts.EndpointURL, queryData)
+
 	if err != nil {
 		return nil, 0, err
 	}
@@ -36,7 +37,14 @@ func getData(query *OeisQuery) ([]string, int, error) {
 	var results []string
 
 	if resultCount > 0 && queryResults != nil {
-		for i := 0; i < consts.SearchResults; i++ {
+		var counter int
+		if consts.SearchResults >= len(queryResults) {
+			counter = len(queryResults)
+		} else {
+			counter = consts.SearchResults
+		}
+
+		for i := 0; i < counter; i++ {
 			results = append(results, queryResults[i].Name)
 		}
 	} else if resultCount > 0 && results == nil {
@@ -60,7 +68,8 @@ func httpGet(baseURL string) ([]byte, error) {
 	var netClient = &http.Client{
 		Timeout: time.Second * 25,
 	}
-	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	s.Prefix = "Waiting for OEIS.ORG to respond: "
 	s.Start()
 	resp, err := netClient.Get(baseURL)
 
@@ -81,7 +90,6 @@ func httpGet(baseURL string) ([]byte, error) {
 func buildURL(inputURL string, queryData string) (string, error) {
 	baseURL, err := url.Parse(inputURL)
 	if err != nil {
-		fmt.Println("Malformed URL: ", err.Error())
 		return "", err
 	}
 	baseURL.Path += "search"
