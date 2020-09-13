@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"oeis/pkg/consts"
 	"time"
+
+	"github.com/briandowns/spinner"
 )
 
 func SearchAPI(queryData string) ([]string, int, error) {
@@ -56,15 +58,17 @@ func validateJSON(body []byte) (*OeisQuery, error) {
 
 func httpGet(baseURL string) ([]byte, error) {
 	var netClient = &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 20,
 	}
 	resp, err := netClient.Get(baseURL)
-
+	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond) // Build our new spinner
+	s.Start()
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
+	defer s.Stop()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -85,6 +89,5 @@ func buildURL(inputURL string, queryData string) (string, error) {
 	params.Add("fmt", "json")
 	baseURL.RawQuery = params.Encode()
 
-	//fmt.Printf("Encoded URL is %q\n", baseURL.String())
 	return baseURL.String(), nil
 }
