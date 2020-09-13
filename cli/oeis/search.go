@@ -58,11 +58,12 @@ func validateJSON(body []byte) (*OeisQuery, error) {
 
 func httpGet(baseURL string) ([]byte, error) {
 	var netClient = &http.Client{
-		Timeout: time.Second * 20,
+		Timeout: time.Second * 25,
 	}
-	resp, err := netClient.Get(baseURL)
-	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond) // Build our new spinner
+	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	s.Start()
+	resp, err := netClient.Get(baseURL)
+
 	if err != nil {
 		return nil, err
 	}
